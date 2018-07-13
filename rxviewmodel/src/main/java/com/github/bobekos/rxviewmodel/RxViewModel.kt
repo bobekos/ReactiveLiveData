@@ -1,10 +1,8 @@
 package com.github.bobekos.rxviewmodel
 
 import android.arch.lifecycle.*
-import io.reactivex.Completable
-import io.reactivex.Flowable
-import io.reactivex.Maybe
-import io.reactivex.Single
+import android.arch.lifecycle.Observer
+import io.reactivex.*
 import io.reactivex.disposables.CompositeDisposable
 
 open class RxViewModel(private val schedulerProvider: SchedulerProvider = SchedulerProvider()) : ViewModel() {
@@ -21,12 +19,14 @@ open class RxViewModel(private val schedulerProvider: SchedulerProvider = Schedu
         return LiveDataReactiveStreams.fromPublisher(flowable)
     }
 
-    inner class CompletableAction(private val action: () -> Unit) {
+    inner class CompletableAction(private val action: () -> Unit,
+                                  private val subscribeScheduler: Scheduler = schedulerProvider.ioScheduler,
+                                  private val observeScheduler: Scheduler = schedulerProvider.uiScheduler) {
 
         fun run(onComplete: () -> Unit = {}, onError: (e: Throwable) -> Unit = {}) {
             disposables.add(Completable.fromAction { action() }
-                    .subscribeOn(schedulerProvider.ioScheduler)
-                    .observeOn(schedulerProvider.uiScheduler)
+                    .subscribeOn(subscribeScheduler)
+                    .observeOn(observeScheduler)
                     .subscribe(
                             {
                                 onComplete()
@@ -40,12 +40,14 @@ open class RxViewModel(private val schedulerProvider: SchedulerProvider = Schedu
 
     }
 
-    inner class ActionFromSingle<T>(private val single: Single<T>) {
+    inner class ActionFromSingle<T>(private val single: Single<T>,
+                                    private val subscribeScheduler: Scheduler = schedulerProvider.ioScheduler,
+                                    private val observeScheduler: Scheduler = schedulerProvider.uiScheduler) {
 
         fun get(onSuccess: (result: T) -> Unit, onError: (e: Throwable) -> Unit = {}) {
             disposables.add(single
-                    .subscribeOn(schedulerProvider.ioScheduler)
-                    .observeOn(schedulerProvider.uiScheduler)
+                    .subscribeOn(subscribeScheduler)
+                    .observeOn(observeScheduler)
                     .subscribe(
                             {
                                 onSuccess(it)
@@ -58,12 +60,14 @@ open class RxViewModel(private val schedulerProvider: SchedulerProvider = Schedu
 
     }
 
-    inner class ActionFromMaybe<T>(private val maybe: Maybe<T>) {
+    inner class ActionFromMaybe<T>(private val maybe: Maybe<T>,
+                                   private val subscribeScheduler: Scheduler = schedulerProvider.ioScheduler,
+                                   private val observeScheduler: Scheduler = schedulerProvider.uiScheduler) {
 
         fun get(onSuccess: (result: T) -> Unit, onError: (e: Throwable) -> Unit = {}, onComplete: () -> Unit = {}) {
             disposables.add(maybe
-                    .subscribeOn(schedulerProvider.ioScheduler)
-                    .observeOn(schedulerProvider.uiScheduler)
+                    .subscribeOn(subscribeScheduler)
+                    .observeOn(observeScheduler)
                     .subscribe(
                             {
                                 onSuccess(it)

@@ -10,11 +10,11 @@ import com.github.bobekos.rxviewmodelexample.database.UserEntity
 class UserViewModel(private val dao: UserDao, provider: SchedulerProvider) : RxViewModel(provider) {
 
     fun insert(id: Int, name: String): CompletableAction {
-        return CompletableAction { dao.insert(UserEntity(id, name)) }
+        return CompletableAction({ dao.insert(UserEntity(id, name)) })
     }
 
     fun update(id: Int, name: String): CompletableAction {
-        return CompletableAction { dao.updateUser(UserEntity(id, name)) }
+        return CompletableAction({ dao.updateUser(UserEntity(id, name)) })
     }
 
     fun getFromSingle(id: Int): ActionFromSingle<UserEntity> {
@@ -26,7 +26,7 @@ class UserViewModel(private val dao: UserDao, provider: SchedulerProvider) : RxV
     }
 
     fun delete(id: Int, name: String): CompletableAction {
-        return CompletableAction { dao.delete(UserEntity(id, name)) }
+        return CompletableAction({ dao.delete(UserEntity(id, name)) })
     }
 
     fun loadUser(): LiveData<UserEntity> {
