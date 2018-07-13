@@ -6,5 +6,5 @@ import io.reactivex.schedulers.Schedulers
 
 
 data class SchedulerProvider(
-        val uiScheduler: Scheduler = AndroidSchedulers.mainThread(),
-        val ioScheduler: Scheduler = Schedulers.io())
+        val observeScheduler: Scheduler = AndroidSchedulers.mainThread(),
+        val subscribeScheduler: Scheduler = Schedulers.io())
