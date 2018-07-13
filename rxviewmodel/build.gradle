@@ -25,6 +25,10 @@ ext {
     allLicenses = ["Apache-2.0"]
 }
 
+tasks.withType(Javadoc).all {
+    enabled = false
+}
+
 android {
     compileSdkVersion 27
 
