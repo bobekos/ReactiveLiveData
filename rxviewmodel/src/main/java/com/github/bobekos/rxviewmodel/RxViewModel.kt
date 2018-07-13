@@ -4,6 +4,7 @@ import android.arch.lifecycle.*
 import android.arch.lifecycle.Observer
 import io.reactivex.*
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 
 open class RxViewModel() : ViewModel() {
 
@@ -15,17 +16,21 @@ open class RxViewModel() : ViewModel() {
         super.onCleared()
     }
 
+    fun addDisposable(disposable: Disposable) {
+        disposables.add(disposable)
+    }
+
     fun <T> liveDataFromFlowable(flowable: Flowable<T>): LiveData<T> {
         return LiveDataReactiveStreams.fromPublisher(flowable)
     }
 
     inner class CompletableAction(
-            private val provider: SchedulerProvider = SchedulerProvider(),
+            private val schedulerProvider: SchedulerProvider = SchedulerProvider(),
             private val action: () -> Unit) {
 
         fun run(onComplete: () -> Unit = {}, onError: (e: Throwable) -> Unit = {}) {
             disposables.add(Completable.fromAction { action() }
-                    .withProvider(provider)
+                    .withProvider(schedulerProvider)
                     .subscribe(
                             {
                                 onComplete()
@@ -39,10 +44,12 @@ open class RxViewModel() : ViewModel() {
 
     }
 
-    inner class ActionFromSingle<T>(private val single: Single<T>) {
+    inner class ActionFromSingle<T>(private val single: Single<T>,
+                                    private val schedulerProvider: SchedulerProvider = SchedulerProvider()) {
 
         fun get(onSuccess: (result: T) -> Unit, onError: (e: Throwable) -> Unit = {}) {
             disposables.add(single
+                    .withProvider(schedulerProvider)
                     .subscribe(
                             {
                                 onSuccess(it)
@@ -55,10 +62,12 @@ open class RxViewModel() : ViewModel() {
 
     }
 
-    inner class ActionFromMaybe<T>(private val maybe: Maybe<T>) {
+    inner class ActionFromMaybe<T>(private val maybe: Maybe<T>,
+                                   private val schedulerProvider: SchedulerProvider = SchedulerProvider()) {
 
         fun get(onSuccess: (result: T) -> Unit, onError: (e: Throwable) -> Unit = {}, onComplete: () -> Unit = {}) {
             disposables.add(maybe
+                    .withProvider(schedulerProvider)
                     .subscribe(
                             {
                                 onSuccess(it)
@@ -76,15 +85,15 @@ open class RxViewModel() : ViewModel() {
     }
 }
 
-fun <T> Single<T>.withProvider(provider: SchedulerProvider = SchedulerProvider()): Single<T> {
+fun <T> Single<T>.withProvider(provider: SchedulerProvider): Single<T> {
     return this.subscribeOn(provider.subscribeScheduler).observeOn(provider.observeScheduler)
 }
 
-fun <T> Maybe<T>.withProvider(provider: SchedulerProvider = SchedulerProvider()): Maybe<T> {
+fun <T> Maybe<T>.withProvider(provider: SchedulerProvider): Maybe<T> {
     return this.subscribeOn(provider.subscribeScheduler).observeOn(provider.observeScheduler)
 }
 
-fun Completable.withProvider(provider: SchedulerProvider = SchedulerProvider()): Completable {
+fun Completable.withProvider(provider: SchedulerProvider): Completable {
     return this.subscribeOn(provider.subscribeScheduler).observeOn(provider.observeScheduler)
 }
 
