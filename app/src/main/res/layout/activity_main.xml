@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/inserBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="insert user"/>
+
+    <Button
+        android:id="@+id/loadSingleBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="load from single"/>
+
+    <Button
+        android:id="@+id/loadMaybeBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="load from maybe"/>
+
+    <Button
+        android:id="@+id/updateBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="update user"/>
+
+    <Button
+        android:id="@+id/deleteBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="delete user"/>
+
+</LinearLayout>
