@@ -2,13 +2,14 @@ package com.github.bobekos.rxviewmodel
 
 import android.arch.lifecycle.*
 import android.arch.lifecycle.Observer
+import android.security.keystore.UserNotAuthenticatedException
 import io.reactivex.*
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 
 open class RxViewModel() : ViewModel() {
 
-    private val disposables: CompositeDisposable = CompositeDisposable()
+    val disposables: CompositeDisposable = CompositeDisposable()
 
     override fun onCleared() {
         disposables.clear()
@@ -16,8 +17,11 @@ open class RxViewModel() : ViewModel() {
         super.onCleared()
     }
 
-    fun addDisposable(disposable: Disposable) {
-        disposables.add(disposable)
+    val <T> T.foo: (T) -> Unit
+        get() = { x -> }
+
+    fun addDisposableTest(action: RxViewModel.() -> Disposable) {
+        disposables.add(action())
     }
 
     fun <T> liveDataFromFlowable(flowable: Flowable<T>): LiveData<T> {
@@ -42,6 +46,13 @@ open class RxViewModel() : ViewModel() {
             )
         }
 
+    }
+
+    inner class Test<T>(private val single: Single<T>) {
+
+        fun get(result: Single<T>.() -> Unit) {
+
+        }
     }
 
     inner class ActionFromSingle<T>(private val single: Single<T>,

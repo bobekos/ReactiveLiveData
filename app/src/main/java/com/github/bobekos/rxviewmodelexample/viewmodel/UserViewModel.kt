@@ -3,11 +3,15 @@ package com.github.bobekos.rxviewmodelexample.viewmodel
 import android.arch.lifecycle.LiveData
 import com.github.bobekos.rxviewmodel.RxViewModel
 import com.github.bobekos.rxviewmodel.SchedulerProvider
+import com.github.bobekos.rxviewmodel.SingleLiveData
 import com.github.bobekos.rxviewmodelexample.database.UserDao
 import com.github.bobekos.rxviewmodelexample.database.UserEntity
+import io.reactivex.Single
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 
 
-class UserViewModel(private val dao: UserDao, private val provider: SchedulerProvider) : RxViewModel() {
+class UserViewModel(val dao: UserDao, private val provider: SchedulerProvider) : RxViewModel() {
 
     fun insert(id: Int, name: String): CompletableAction {
         return CompletableAction(provider) { dao.insert(UserEntity(id, name)) }
@@ -31,6 +35,26 @@ class UserViewModel(private val dao: UserDao, private val provider: SchedulerPro
 
     fun loadUser(): LiveData<UserEntity> {
         return liveDataFromFlowable(dao.getUsers())
+    }
+
+    fun addDisposableTest2(action: UserViewModel.() -> Disposable) {
+        //addDisposable(action())
+    }
+
+    fun testSingleToLiveData(): LiveData<UserEntity> {
+        return SingleLiveData.fromSingleSource(dao.getByIdAsSingle(1).subscribeOn(Schedulers.io()))
+    }
+
+    fun getTest(id: Int): Single<UserEntity> {
+        return dao.getByIdAsSingle(id)
+    }
+
+    fun add() {
+
+    }
+
+    fun <T> addDisposable(disposable: Disposable) {
+        disposables.add(disposable)
     }
 
 }

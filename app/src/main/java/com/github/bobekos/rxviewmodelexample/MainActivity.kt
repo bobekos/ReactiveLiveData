@@ -3,8 +3,13 @@ package com.github.bobekos.rxviewmodelexample
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
+import com.github.bobekos.rxviewmodel.SchedulerProvider
 import com.github.bobekos.rxviewmodel.nonNullObserver
+import com.github.bobekos.rxviewmodel.withProvider
+import com.github.bobekos.rxviewmodelexample.database.UserEntity
 import com.github.bobekos.rxviewmodelexample.viewmodel.UserViewModel
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.ext.android.inject
 
@@ -21,23 +26,27 @@ class MainActivity : AppCompatActivity() {
         })
 
         inserBtn.setOnClickListener {
-            viewModel.insert(1, "Bobekos").run(
-                    {
-                        showToast("User inserted")
-                    },
-                    {
-                        showToast(it.message ?: "error from completable")
-                    })
+            addNormal()
         }
 
         loadSingleBtn.setOnClickListener {
-            viewModel.getFromSingle(1).get(
+            /*viewModel.getFromSingle(1).get(
                     {
                         showToast("User ${it.username} loaded")
                     },
                     {
                         showToast(it.message ?: "error from single")
+                    })*/
+
+            viewModel.testSingleToLiveData().nonNullObserver(this,
+                    observer = {
+                        val test = it
+                        val stop = ""
+                    },
+                    nullObserver = {
+                        val stop = ""
                     })
+
         }
 
         loadMaybeBtn.setOnClickListener {
@@ -72,5 +81,14 @@ class MainActivity : AppCompatActivity() {
     private fun showToast(content: String) {
         Toast.makeText(this, content, Toast.LENGTH_SHORT).show()
     }
-}
 
+    private fun addNormal() {
+        viewModel.insert(1, "Bobekos").run(
+                {
+                    showToast("User inserted")
+                },
+                {
+                    showToast(it.message ?: "error from completable")
+                })
+    }
+}
