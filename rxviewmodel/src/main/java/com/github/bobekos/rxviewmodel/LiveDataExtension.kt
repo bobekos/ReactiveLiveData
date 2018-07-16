@@ -38,3 +38,13 @@ fun LiveData<Optional<Nothing>>.completableObserver(owner: LifecycleOwner, onCom
         }
     })
 }
+
+fun <T> LiveData<T>.nonNullObserver(owner: LifecycleOwner, observer: (t: T) -> Unit, nullObserver: () -> Unit = {}) {
+    this.observe(owner, Observer {
+        if (it != null) {
+            observer(it)
+        } else {
+            nullObserver()
+        }
+    })
+}
