@@ -10,15 +10,14 @@ import com.github.bobekos.rxviewmodel.SingleReactiveSource
 import com.github.bobekos.rxviewmodelexample.database.UserDao
 import com.github.bobekos.rxviewmodelexample.database.UserEntity
 import io.reactivex.Completable
-import io.reactivex.schedulers.Schedulers
 
 
 class UserViewModel(private val dao: UserDao) : ViewModel() {
 
     fun insert(id: Int, name: String): LiveData<Optional<Nothing>> {
-        return CompletableReactiveSource.from(Completable.fromAction {
+        return CompletableReactiveSource.fromAction {
             dao.insert(UserEntity(id, name))
-        })
+        }
     }
 
     fun update(id: Int, name: String): LiveData<Optional<Nothing>> {
