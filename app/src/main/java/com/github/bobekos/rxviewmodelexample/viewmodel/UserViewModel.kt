@@ -18,27 +18,27 @@ class UserViewModel(private val dao: UserDao) : ViewModel() {
     fun insert(id: Int, name: String): LiveData<Optional<Nothing>> {
         return CompletableReactiveSource.from(Completable.fromAction {
             dao.insert(UserEntity(id, name))
-        }.subscribeOn(Schedulers.io()))
+        })
     }
 
     fun update(id: Int, name: String): LiveData<Optional<Nothing>> {
         return CompletableReactiveSource.from(Completable.fromAction {
             dao.updateUser(UserEntity(id, name))
-        }.subscribeOn(Schedulers.io()))
+        })
     }
 
     fun getFromSingle(id: Int): LiveData<Optional<UserEntity>> {
-        return SingleReactiveSource.from(dao.getByIdAsSingle(id).subscribeOn(Schedulers.io()))
+        return SingleReactiveSource.from(dao.getByIdAsSingle(id))
     }
 
     fun getFromMaybe(id: Int): LiveData<Optional<UserEntity>> {
-        return MaybeReactiveSource.from(dao.getByIdAsMaybe(id).subscribeOn(Schedulers.io()))
+        return MaybeReactiveSource.from(dao.getByIdAsMaybe(id))
     }
 
     fun delete(id: Int, name: String): LiveData<Optional<Nothing>> {
         return CompletableReactiveSource.from(Completable.fromAction {
             dao.delete(UserEntity(id, name))
-        }.subscribeOn(Schedulers.io()))
+        })
     }
 
     fun loadUser(): LiveData<UserEntity> {
