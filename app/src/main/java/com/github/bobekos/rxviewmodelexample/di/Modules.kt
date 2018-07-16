@@ -1,7 +1,6 @@
 package com.github.bobekos.rxviewmodelexample.di
 
 import android.arch.persistence.room.Room
-import com.github.bobekos.rxviewmodel.SchedulerProvider
 import com.github.bobekos.rxviewmodelexample.database.Database
 import com.github.bobekos.rxviewmodelexample.viewmodel.UserViewModel
 import org.koin.android.architecture.ext.viewModel
@@ -24,12 +23,7 @@ object Modules {
 
     val vm: Module = applicationContext {
         viewModel {
-            UserViewModel(get(), get())
+            UserViewModel(get())
         }
     }
-
-    val schedulerProvider = applicationContext {
-        bean { SchedulerProvider() }
-    }
-
 }

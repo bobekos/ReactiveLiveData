@@ -1,58 +1,46 @@
 package com.github.bobekos.rxviewmodelexample.viewmodel
 
 import android.arch.lifecycle.LiveData
-import com.github.bobekos.rxviewmodel.*
+import android.arch.lifecycle.LiveDataReactiveStreams
+import android.arch.lifecycle.ViewModel
+import com.github.bobekos.rxviewmodel.CompletableReactiveSource
+import com.github.bobekos.rxviewmodel.MaybeReactiveSource
+import com.github.bobekos.rxviewmodel.Optional
+import com.github.bobekos.rxviewmodel.SingleReactiveSource
 import com.github.bobekos.rxviewmodelexample.database.UserDao
 import com.github.bobekos.rxviewmodelexample.database.UserEntity
-import io.reactivex.Single
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.Completable
 
 
-class UserViewModel(val dao: UserDao, private val provider: SchedulerProvider) : RxViewModel() {
+class UserViewModel(private val dao: UserDao) : ViewModel() {
 
-    fun insert(id: Int, name: String): CompletableAction {
-        return CompletableAction(provider) { dao.insert(UserEntity(id, name)) }
+    fun insert(id: Int, name: String): LiveData<Optional<Nothing>> {
+        return CompletableReactiveSource.fromAction {
+            dao.insert(UserEntity(id, name))
+        }
     }
 
-    fun update(id: Int, name: String): CompletableAction {
-        return CompletableAction(provider) { dao.updateUser(UserEntity(id, name)) }
+    fun update(id: Int, name: String): LiveData<Optional<Nothing>> {
+        return CompletableReactiveSource.from(Completable.fromAction {
+            dao.updateUser(UserEntity(id, name))
+        })
     }
 
-    fun getFromSingle(id: Int): ActionFromSingle<UserEntity> {
-        return ActionFromSingle(dao.getByIdAsSingle(id), provider)
+    fun getFromSingle(id: Int): LiveData<Optional<UserEntity>> {
+        return SingleReactiveSource.from(dao.getByIdAsSingle(id))
     }
 
     fun getFromMaybe(id: Int): LiveData<Optional<UserEntity>> {
-        return MaybeReactiveSource.from(dao.getByIdAsMaybe(id).subscribeOn(Schedulers.io()))
+        return MaybeReactiveSource.from(dao.getByIdAsMaybe(id))
     }
 
-    fun delete(id: Int, name: String): CompletableAction {
-        return CompletableAction(provider) { dao.delete(UserEntity(id, name)) }
+    fun delete(id: Int, name: String): LiveData<Optional<Nothing>> {
+        return CompletableReactiveSource.from(Completable.fromAction {
+            dao.delete(UserEntity(id, name))
+        })
     }
 
     fun loadUser(): LiveData<UserEntity> {
-        return liveDataFromFlowable(dao.getUsers())
+        return LiveDataReactiveStreams.fromPublisher(dao.getUsers())
     }
-
-    fun addDisposableTest2(action: UserViewModel.() -> Disposable) {
-        //addDisposable(action())
-    }
-
-    fun testSingleToLiveData(): LiveData<Optional<UserEntity>> {
-        return SingleReactiveSource.from(dao.getByIdAsSingle(1).subscribeOn(Schedulers.io()))
-    }
-
-    fun getTest(id: Int): Single<UserEntity> {
-        return dao.getByIdAsSingle(id)
-    }
-
-    fun add() {
-
-    }
-
-    fun <T> addDisposable(disposable: Disposable) {
-        disposables.add(disposable)
-    }
-
 }

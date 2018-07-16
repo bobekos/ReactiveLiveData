@@ -2,18 +2,20 @@ package com.github.bobekos.rxviewmodel
 
 import android.arch.lifecycle.LiveData
 import android.support.annotation.NonNull
+import io.reactivex.Maybe
 import io.reactivex.MaybeObserver
-import io.reactivex.MaybeSource
+import io.reactivex.Scheduler
 import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 
-class MaybeReactiveSource<T>(@NonNull private val source: MaybeSource<T>) : LiveData<Optional<T>>() {
+class MaybeReactiveSource<T>(@NonNull private val source: Maybe<T>) : LiveData<Optional<T>>() {
 
     companion object {
-        fun <T> from(@NonNull source: MaybeSource<T>): LiveData<Optional<T>> {
-            return MaybeReactiveSource(source)
+        fun <T> from(@NonNull source: Maybe<T>, subscribeScheduler: Scheduler = Schedulers.io()): LiveData<Optional<T>> {
+            return MaybeReactiveSource(source.subscribeOn(subscribeScheduler))
         }
     }
 

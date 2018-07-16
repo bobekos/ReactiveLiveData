@@ -4,16 +4,22 @@ import android.arch.lifecycle.LiveData
 import android.support.annotation.NonNull
 import io.reactivex.Completable
 import io.reactivex.CompletableObserver
+import io.reactivex.Scheduler
 import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 
-class CompletableReactiveSource(@NonNull private val source: Completable) : LiveData<Optional<Nothing>>() {
+class CompletableReactiveSource constructor(@NonNull private val source: Completable) : LiveData<Optional<Nothing>>() {
 
     companion object {
-        fun from(@NonNull source: Completable): LiveData<Optional<Nothing>> {
-            return CompletableReactiveSource(source)
+        fun from(@NonNull source: Completable, subscribeScheduler: Scheduler = Schedulers.io()): LiveData<Optional<Nothing>> {
+            return CompletableReactiveSource(source.subscribeOn(subscribeScheduler))
+        }
+
+        fun fromAction(subscribeScheduler: Scheduler = Schedulers.io(), action: () -> Unit): LiveData<Optional<Nothing>> {
+            return from(Completable.fromAction { action() }, subscribeScheduler)
         }
     }
 

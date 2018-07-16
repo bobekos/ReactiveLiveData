@@ -2,18 +2,20 @@ package com.github.bobekos.rxviewmodel
 
 import android.arch.lifecycle.LiveData
 import android.support.annotation.NonNull
+import io.reactivex.Scheduler
+import io.reactivex.Single
 import io.reactivex.SingleObserver
-import io.reactivex.SingleSource
 import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 
-class SingleReactiveSource<T>(@NonNull private val source: SingleSource<T>) : LiveData<Optional<T>>() {
+class SingleReactiveSource<T>(@NonNull private val source: Single<T>) : LiveData<Optional<T>>() {
 
     companion object {
-        fun <T> from(@NonNull source: SingleSource<T>): LiveData<Optional<T>> {
-            return SingleReactiveSource(source)
+        fun <T> from(@NonNull source: Single<T>, subscribeScheduler: Scheduler = Schedulers.io()): LiveData<Optional<T>> {
+            return SingleReactiveSource(source.subscribeOn(subscribeScheduler))
         }
     }
 

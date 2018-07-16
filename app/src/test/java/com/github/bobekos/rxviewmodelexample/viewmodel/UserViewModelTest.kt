@@ -2,7 +2,6 @@ package com.github.bobekos.rxviewmodelexample.viewmodel
 
 import android.arch.persistence.room.EmptyResultSetException
 import android.database.sqlite.SQLiteConstraintException
-import com.github.bobekos.rxviewmodel.SchedulerProvider
 import com.github.bobekos.rxviewmodelexample.database.UserDao
 import com.github.bobekos.rxviewmodelexample.database.UserEntity
 import io.reactivex.Maybe

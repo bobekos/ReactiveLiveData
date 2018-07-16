@@ -5,7 +5,7 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.Observer
 
 
-fun <T> LiveData<Optional<T>>.singleObserver(owner: LifecycleOwner, onSuccess: (t: T) -> Unit, onError: (e: Throwable) -> Unit = {}) {
+fun <T> LiveData<Optional<T>>.subscribeSingle(owner: LifecycleOwner, onSuccess: (t: T) -> Unit, onError: (e: Throwable) -> Unit = {}) {
     this.observe(owner, Observer {
         if (it != null) {
             when (it) {
@@ -16,7 +16,7 @@ fun <T> LiveData<Optional<T>>.singleObserver(owner: LifecycleOwner, onSuccess: (
     })
 }
 
-fun <T> LiveData<Optional<T>>.maybeObserver(owner: LifecycleOwner, onSuccess: (t: T) -> Unit, onError: (e: Throwable) -> Unit = {}, onComplete: () -> Unit = {}) {
+fun <T> LiveData<Optional<T>>.subscribeMaybe(owner: LifecycleOwner, onSuccess: (t: T) -> Unit, onError: (e: Throwable) -> Unit = {}, onComplete: () -> Unit = {}) {
     this.observe(owner, Observer {
         if (it != null) {
             when (it) {
@@ -28,13 +28,23 @@ fun <T> LiveData<Optional<T>>.maybeObserver(owner: LifecycleOwner, onSuccess: (t
     })
 }
 
-fun LiveData<Optional<Nothing>>.completableObserver(owner: LifecycleOwner, onComplete: () -> Unit = {}, onError: (e: Throwable) -> Unit = {}) {
+fun LiveData<Optional<Nothing>>.subscribeCompletable(owner: LifecycleOwner, onComplete: () -> Unit = {}, onError: (e: Throwable) -> Unit = {}) {
     this.observe(owner, Observer {
         if (it != null) {
             when (it) {
                 is Optional.Complete -> onComplete()
                 is Optional.Exception -> onError(it.throwable)
             }
+        }
+    })
+}
+
+fun <T> LiveData<T>.nonNullObserver(owner: LifecycleOwner, observer: (t: T) -> Unit, nullObserver: () -> Unit = {}) {
+    this.observe(owner, Observer {
+        if (it != null) {
+            observer(it)
+        } else {
+            nullObserver()
         }
     })
 }

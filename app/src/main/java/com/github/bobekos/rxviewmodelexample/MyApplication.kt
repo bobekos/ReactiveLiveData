@@ -12,8 +12,7 @@ class MyApplication : Application() {
 
         startKoin(this, listOf(
                 Modules.vm,
-                Modules.database,
-                Modules.schedulerProvider
+                Modules.database
         ))
     }
 
