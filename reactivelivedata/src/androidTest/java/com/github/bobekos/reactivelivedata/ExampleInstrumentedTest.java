@@ -1,4 +1,4 @@
-package com.github.bobekos.rxviewmodel;
+package com.github.bobekos.reactivelivedata;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

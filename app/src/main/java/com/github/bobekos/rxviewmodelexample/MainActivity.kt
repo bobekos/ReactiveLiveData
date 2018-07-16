@@ -3,10 +3,10 @@ package com.github.bobekos.rxviewmodelexample
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
-import com.github.bobekos.rxviewmodel.subscribeCompletable
-import com.github.bobekos.rxviewmodel.subscribeMaybe
-import com.github.bobekos.rxviewmodel.nonNullObserver
-import com.github.bobekos.rxviewmodel.subscribeSingle
+import com.github.bobekos.reactivelivedata.subscribeCompletable
+import com.github.bobekos.reactivelivedata.subscribeMaybe
+import com.github.bobekos.reactivelivedata.nonNullObserver
+import com.github.bobekos.reactivelivedata.subscribeSingle
 import com.github.bobekos.rxviewmodelexample.viewmodel.UserViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.ext.android.inject

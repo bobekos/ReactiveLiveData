@@ -3,10 +3,10 @@ package com.github.bobekos.rxviewmodelexample.viewmodel
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.LiveDataReactiveStreams
 import android.arch.lifecycle.ViewModel
-import com.github.bobekos.rxviewmodel.CompletableReactiveSource
-import com.github.bobekos.rxviewmodel.MaybeReactiveSource
-import com.github.bobekos.rxviewmodel.Optional
-import com.github.bobekos.rxviewmodel.SingleReactiveSource
+import com.github.bobekos.reactivelivedata.CompletableReactiveSource
+import com.github.bobekos.reactivelivedata.MaybeReactiveSource
+import com.github.bobekos.reactivelivedata.Optional
+import com.github.bobekos.reactivelivedata.SingleReactiveSource
 import com.github.bobekos.rxviewmodelexample.database.UserDao
 import com.github.bobekos.rxviewmodelexample.database.UserEntity
 import io.reactivex.Completable

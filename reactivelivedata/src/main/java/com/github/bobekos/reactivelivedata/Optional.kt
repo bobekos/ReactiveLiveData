@@ -1,4 +1,4 @@
-package com.github.bobekos.rxviewmodel
+package com.github.bobekos.reactivelivedata
 
 
 sealed class Optional<T> {

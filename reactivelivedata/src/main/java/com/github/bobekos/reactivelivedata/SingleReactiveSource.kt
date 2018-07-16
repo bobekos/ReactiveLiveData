@@ -1,4 +1,4 @@
-package com.github.bobekos.rxviewmodel
+package com.github.bobekos.reactivelivedata
 
 import android.arch.lifecycle.LiveData
 import android.support.annotation.NonNull

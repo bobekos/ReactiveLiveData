@@ -3,18 +3,18 @@ apply plugin: 'kotlin-android'
 
 ext {
     bintrayRepo = 'maven'
-    bintrayName = 'RxViewModel'
+    bintrayName = 'ReactiveViewModel'
 
     publishedGroupId = 'com.github.bobekos'
-    libraryName = 'RxViewModel'
-    artifact = 'rxviewmodel'
+    libraryName = 'ReactiveViewModel'
+    artifact = 'reactiveviewmodel'
 
     siteUrl = 'https://github.com/bobekos/RxViewModel'
     gitUrl = 'https://github.com/bobekos/RxViewModel.git'
 
-    libraryDescription = 'An RxJava Extension to the ViewModel introduced by Google.'
+    libraryDescription = 'An RxJava Extension to the LiveData observer introduced by Google.'
 
-    libraryVersion = '1.1.0'
+    libraryVersion = '1.0.0'
 
     developerId = 'bobekos'
     developerName = 'Bobek Bobekos'
