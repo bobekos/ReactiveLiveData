@@ -8,7 +8,7 @@ import io.reactivex.disposables.Disposable
 
 open class RxViewModel() : ViewModel() {
 
-    private val disposables: CompositeDisposable = CompositeDisposable()
+    val disposables: CompositeDisposable = CompositeDisposable()
 
     override fun onCleared() {
         disposables.clear()
@@ -16,8 +16,11 @@ open class RxViewModel() : ViewModel() {
         super.onCleared()
     }
 
-    fun addDisposable(disposable: Disposable) {
-        disposables.add(disposable)
+    val <T> T.foo: (T) -> Unit
+        get() = { x -> }
+
+    fun addDisposableTest(action: RxViewModel.() -> Disposable) {
+        disposables.add(action())
     }
 
     fun <T> liveDataFromFlowable(flowable: Flowable<T>): LiveData<T> {
@@ -42,6 +45,13 @@ open class RxViewModel() : ViewModel() {
             )
         }
 
+    }
+
+    inner class Test<T>(private val single: Single<T>) {
+
+        fun get(result: Single<T>.() -> Unit) {
+
+        }
     }
 
     inner class ActionFromSingle<T>(private val single: Single<T>,
@@ -103,6 +113,17 @@ fun <T> LiveData<T>.nonNullObserver(owner: LifecycleOwner, observer: (t: T) -> U
             observer(it)
         } else {
             nullObserver()
+        }
+    })
+}
+
+fun <T> LiveData<Optional<T>>.optionalObserver(owner: LifecycleOwner, onSuccess: (t: T) -> Unit, onError: (e: Throwable) -> Unit = {}) {
+    this.observe(owner, Observer {
+        if (it != null) {
+            when (it) {
+                is Optional.Result<T> -> onSuccess(it.result)
+                is Optional.Exception<T> -> onError(it.throwable)
+            }
         }
     })
 }
