@@ -24,7 +24,7 @@ class UserViewModel(val dao: UserDao, private val provider: SchedulerProvider) :
     }
 
     fun getFromMaybe(id: Int): LiveData<Optional<UserEntity>> {
-        return MaybeReactiveStream.fromSource(dao.getByIdAsMaybe(id).subscribeOn(Schedulers.io()))
+        return MaybeReactiveSource.from(dao.getByIdAsMaybe(id).subscribeOn(Schedulers.io()))
     }
 
     fun delete(id: Int, name: String): CompletableAction {
@@ -40,7 +40,7 @@ class UserViewModel(val dao: UserDao, private val provider: SchedulerProvider) :
     }
 
     fun testSingleToLiveData(): LiveData<Optional<UserEntity>> {
-        return SingleReactiveStream.fromSource(dao.getByIdAsSingle(1).subscribeOn(Schedulers.io()))
+        return SingleReactiveSource.from(dao.getByIdAsSingle(1).subscribeOn(Schedulers.io()))
     }
 
     fun getTest(id: Int): Single<UserEntity> {

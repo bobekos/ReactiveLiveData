@@ -9,11 +9,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 
-class MaybeReactiveStream<T>(@NonNull private val source: MaybeSource<T>) : LiveData<Optional<T>>() {
+class MaybeReactiveSource<T>(@NonNull private val source: MaybeSource<T>) : LiveData<Optional<T>>() {
 
     companion object {
-        fun <T> fromSource(@NonNull source: MaybeSource<T>): LiveData<Optional<T>> {
-            return MaybeReactiveStream(source)
+        fun <T> from(@NonNull source: MaybeSource<T>): LiveData<Optional<T>> {
+            return MaybeReactiveSource(source)
         }
     }
 
