@@ -2,29 +2,29 @@ package com.github.bobekos.rxviewmodel
 
 import android.arch.lifecycle.LiveData
 import android.support.annotation.NonNull
-import io.reactivex.SingleObserver
-import io.reactivex.SingleSource
+import io.reactivex.Completable
+import io.reactivex.CompletableObserver
 import io.reactivex.disposables.Disposable
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 
-class SingleReactiveStream<T>(@NonNull private val source: SingleSource<T>) : LiveData<Optional<T>>() {
+class CompletableReactiveSource(@NonNull private val source: Completable) : LiveData<Optional<Nothing>>() {
 
     companion object {
-        fun <T> fromSource(@NonNull source: SingleSource<T>): LiveData<Optional<T>> {
-            return SingleReactiveStream(source)
+        fun from(@NonNull source: Completable): LiveData<Optional<Nothing>> {
+            return CompletableReactiveSource(source)
         }
     }
 
-    private val subscriber = AtomicReference<SingleDataSubscriber>()
+    private val subscriber = AtomicReference<CompletableDataSubscriber>()
     private val pendingEvent = AtomicBoolean(false)
 
     override fun onActive() {
         super.onActive()
 
         if (pendingEvent.compareAndSet(false, true)) {
-            val s = SingleDataSubscriber()
+            val s = CompletableDataSubscriber()
             subscriber.set(s)
             source.subscribe(s)
         }
@@ -36,11 +36,10 @@ class SingleReactiveStream<T>(@NonNull private val source: SingleSource<T>) : Li
         subscriber.getAndSet(null)?.dispose()
     }
 
+    inner class CompletableDataSubscriber : AtomicReference<Disposable>(), CompletableObserver {
 
-    inner class SingleDataSubscriber : AtomicReference<Disposable>(), SingleObserver<T> {
-
-        override fun onSuccess(t: T) {
-            postValue(Optional.Result(t))
+        override fun onComplete() {
+            postValue(Optional.Complete())
 
             subscriber.compareAndSet(this, null)
         }
@@ -50,7 +49,7 @@ class SingleReactiveStream<T>(@NonNull private val source: SingleSource<T>) : Li
         }
 
         override fun onError(e: Throwable) {
-            postValue(Optional.Exception<T>(e))
+            postValue(Optional.Exception(e))
 
             subscriber.compareAndSet(this, null)
         }
@@ -58,6 +57,6 @@ class SingleReactiveStream<T>(@NonNull private val source: SingleSource<T>) : Li
         fun dispose() {
             get()?.dispose()
         }
-    }
 
+    }
 }
