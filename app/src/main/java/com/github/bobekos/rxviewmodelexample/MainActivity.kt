@@ -1,11 +1,11 @@
 package com.github.bobekos.rxviewmodelexample
 
-import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
+import com.github.bobekos.rxviewmodel.maybeObserver
 import com.github.bobekos.rxviewmodel.nonNullObserver
-import com.github.bobekos.rxviewmodel.optionalObserver
+import com.github.bobekos.rxviewmodel.singleObserver
 import com.github.bobekos.rxviewmodelexample.viewmodel.UserViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.ext.android.inject
@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
                         showToast(it.message ?: "error from single")
                     })*/
 
-            viewModel.testSingleToLiveData().optionalObserver(this,
+            viewModel.testSingleToLiveData().singleObserver(this,
                     onSuccess = {
                         val test = it
                         val stopp = ""
@@ -47,17 +47,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         loadMaybeBtn.setOnClickListener {
-            viewModel.getFromMaybe(1).get(
-                    {
+            viewModel.getFromMaybe(1).maybeObserver(this,
+                    onSuccess = {
                         showToast("User ${it.username} loaded")
                     },
-                    {
+                    onError = {
                         showToast(it.message ?: "error from maybe")
                     },
-                    {
+                    onComplete = {
                         showToast("No user found")
-                    }
-            )
+                    })
         }
 
         updateBtn.setOnClickListener {

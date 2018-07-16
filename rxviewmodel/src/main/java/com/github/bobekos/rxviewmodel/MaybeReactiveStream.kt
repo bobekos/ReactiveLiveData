@@ -2,29 +2,29 @@ package com.github.bobekos.rxviewmodel
 
 import android.arch.lifecycle.LiveData
 import android.support.annotation.NonNull
-import io.reactivex.SingleObserver
-import io.reactivex.SingleSource
+import io.reactivex.MaybeObserver
+import io.reactivex.MaybeSource
 import io.reactivex.disposables.Disposable
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 
-class SingleEvent<T>(@NonNull private val source: SingleSource<T>) : LiveData<Optional<T>>() {
+class MaybeReactiveStream<T>(@NonNull private val source: MaybeSource<T>) : LiveData<Optional<T>>() {
 
     companion object {
-        fun <T> fromSource(@NonNull source: SingleSource<T>): LiveData<Optional<T>> {
-            return SingleEvent(source)
+        fun <T> fromSource(@NonNull source: MaybeSource<T>): LiveData<Optional<T>> {
+            return MaybeReactiveStream(source)
         }
     }
 
-    private val subscriber = AtomicReference<SingleDataSubscriber>()
+    private val subscriber = AtomicReference<MaybeDataSubscriber>()
     private val pendingEvent = AtomicBoolean(false)
 
     override fun onActive() {
         super.onActive()
 
         if (pendingEvent.compareAndSet(false, true)) {
-            val s = SingleDataSubscriber()
+            val s = MaybeDataSubscriber()
             subscriber.set(s)
             source.subscribe(s)
         }
@@ -36,11 +36,16 @@ class SingleEvent<T>(@NonNull private val source: SingleSource<T>) : LiveData<Op
         subscriber.getAndSet(null)?.dispose()
     }
 
-
-    inner class SingleDataSubscriber : AtomicReference<Disposable>(), SingleObserver<T> {
+    inner class MaybeDataSubscriber : AtomicReference<Disposable>(), MaybeObserver<T> {
 
         override fun onSuccess(t: T) {
             postValue(Optional.Result(t))
+
+            subscriber.compareAndSet(this, null)
+        }
+
+        override fun onComplete() {
+            postValue(Optional.Complete())
 
             subscriber.compareAndSet(this, null)
         }
@@ -50,7 +55,7 @@ class SingleEvent<T>(@NonNull private val source: SingleSource<T>) : LiveData<Op
         }
 
         override fun onError(e: Throwable) {
-            postValue(Optional.Exception<T>(e))
+            postValue(Optional.Exception(e))
 
             subscriber.compareAndSet(this, null)
         }
@@ -58,6 +63,7 @@ class SingleEvent<T>(@NonNull private val source: SingleSource<T>) : LiveData<Op
         fun dispose() {
             get()?.dispose()
         }
+
     }
 
 }
