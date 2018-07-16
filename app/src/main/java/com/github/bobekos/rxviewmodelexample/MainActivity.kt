@@ -1,15 +1,12 @@
 package com.github.bobekos.rxviewmodelexample
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
-import com.github.bobekos.rxviewmodel.SchedulerProvider
 import com.github.bobekos.rxviewmodel.nonNullObserver
-import com.github.bobekos.rxviewmodel.withProvider
-import com.github.bobekos.rxviewmodelexample.database.UserEntity
+import com.github.bobekos.rxviewmodel.optionalObserver
 import com.github.bobekos.rxviewmodelexample.viewmodel.UserViewModel
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.ext.android.inject
 
@@ -38,15 +35,15 @@ class MainActivity : AppCompatActivity() {
                         showToast(it.message ?: "error from single")
                     })*/
 
-            viewModel.testSingleToLiveData().nonNullObserver(this,
-                    observer = {
+            viewModel.testSingleToLiveData().optionalObserver(this,
+                    onSuccess = {
                         val test = it
-                        val stop = ""
+                        val stopp = ""
                     },
-                    nullObserver = {
-                        val stop = ""
+                    onError = {
+                        val stop = it
+                        val stopp = ""
                     })
-
         }
 
         loadMaybeBtn.setOnClickListener {

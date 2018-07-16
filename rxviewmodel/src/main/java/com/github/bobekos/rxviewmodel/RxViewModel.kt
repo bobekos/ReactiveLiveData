@@ -2,7 +2,6 @@ package com.github.bobekos.rxviewmodel
 
 import android.arch.lifecycle.*
 import android.arch.lifecycle.Observer
-import android.security.keystore.UserNotAuthenticatedException
 import io.reactivex.*
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
@@ -114,6 +113,17 @@ fun <T> LiveData<T>.nonNullObserver(owner: LifecycleOwner, observer: (t: T) -> U
             observer(it)
         } else {
             nullObserver()
+        }
+    })
+}
+
+fun <T> LiveData<Optional<T>>.optionalObserver(owner: LifecycleOwner, onSuccess: (t: T) -> Unit, onError: (e: Throwable) -> Unit = {}) {
+    this.observe(owner, Observer {
+        if (it != null) {
+            when (it) {
+                is Optional.Result<T> -> onSuccess(it.result)
+                is Optional.Exception<T> -> onError(it.throwable)
+            }
         }
     })
 }

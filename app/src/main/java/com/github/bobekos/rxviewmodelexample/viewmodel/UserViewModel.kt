@@ -1,9 +1,10 @@
 package com.github.bobekos.rxviewmodelexample.viewmodel
 
 import android.arch.lifecycle.LiveData
+import com.github.bobekos.rxviewmodel.Optional
 import com.github.bobekos.rxviewmodel.RxViewModel
 import com.github.bobekos.rxviewmodel.SchedulerProvider
-import com.github.bobekos.rxviewmodel.SingleLiveData
+import com.github.bobekos.rxviewmodel.SingleEvent
 import com.github.bobekos.rxviewmodelexample.database.UserDao
 import com.github.bobekos.rxviewmodelexample.database.UserEntity
 import io.reactivex.Single
@@ -41,8 +42,8 @@ class UserViewModel(val dao: UserDao, private val provider: SchedulerProvider) :
         //addDisposable(action())
     }
 
-    fun testSingleToLiveData(): LiveData<UserEntity> {
-        return SingleLiveData.fromSingleSource(dao.getByIdAsSingle(1).subscribeOn(Schedulers.io()))
+    fun testSingleToLiveData(): LiveData<Optional<UserEntity>> {
+        return SingleEvent.fromSource(dao.getByIdAsSingle(1).subscribeOn(Schedulers.io()))
     }
 
     fun getTest(id: Int): Single<UserEntity> {
