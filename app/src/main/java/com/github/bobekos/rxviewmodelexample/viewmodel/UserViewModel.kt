@@ -1,10 +1,7 @@
 package com.github.bobekos.rxviewmodelexample.viewmodel
 
 import android.arch.lifecycle.LiveData
-import com.github.bobekos.rxviewmodel.Optional
-import com.github.bobekos.rxviewmodel.RxViewModel
-import com.github.bobekos.rxviewmodel.SchedulerProvider
-import com.github.bobekos.rxviewmodel.SingleEvent
+import com.github.bobekos.rxviewmodel.*
 import com.github.bobekos.rxviewmodelexample.database.UserDao
 import com.github.bobekos.rxviewmodelexample.database.UserEntity
 import io.reactivex.Single
@@ -26,8 +23,8 @@ class UserViewModel(val dao: UserDao, private val provider: SchedulerProvider) :
         return ActionFromSingle(dao.getByIdAsSingle(id), provider)
     }
 
-    fun getFromMaybe(id: Int): ActionFromMaybe<UserEntity> {
-        return ActionFromMaybe(dao.getByIdAsMaybe(id), provider)
+    fun getFromMaybe(id: Int): LiveData<Optional<UserEntity>> {
+        return MaybeReactiveStream.fromSource(dao.getByIdAsMaybe(id).subscribeOn(Schedulers.io()))
     }
 
     fun delete(id: Int, name: String): CompletableAction {
@@ -43,7 +40,7 @@ class UserViewModel(val dao: UserDao, private val provider: SchedulerProvider) :
     }
 
     fun testSingleToLiveData(): LiveData<Optional<UserEntity>> {
-        return SingleEvent.fromSource(dao.getByIdAsSingle(1).subscribeOn(Schedulers.io()))
+        return SingleReactiveStream.fromSource(dao.getByIdAsSingle(1).subscribeOn(Schedulers.io()))
     }
 
     fun getTest(id: Int): Single<UserEntity> {

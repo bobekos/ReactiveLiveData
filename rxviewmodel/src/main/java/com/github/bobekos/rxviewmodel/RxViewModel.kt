@@ -116,14 +116,3 @@ fun <T> LiveData<T>.nonNullObserver(owner: LifecycleOwner, observer: (t: T) -> U
         }
     })
 }
-
-fun <T> LiveData<Optional<T>>.optionalObserver(owner: LifecycleOwner, onSuccess: (t: T) -> Unit, onError: (e: Throwable) -> Unit = {}) {
-    this.observe(owner, Observer {
-        if (it != null) {
-            when (it) {
-                is Optional.Result<T> -> onSuccess(it.result)
-                is Optional.Exception<T> -> onError(it.throwable)
-            }
-        }
-    })
-}
