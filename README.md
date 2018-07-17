@@ -2,11 +2,18 @@
 
 An RxJava Extension for the LiveData observer introduced by Google. Provides the ability to perform single actions using RxJava and takes advantage of an automatic subscription of the Lifecycle owner. Mainly designed to used Room CRUD commands with RxJava.
 
+## Why this lib?
+
+[Medium article](https://medium.com/@bobek.bobekos/android-room-livedata-and-rxjava-c6aa0aac9b2c)
+
 ## Getting Started
 
 ### Setting up the dependency
 
-...
+[![](https://api.bintray.com/packages/bobekos/maven/ReactiveLiveData/images/download.svg)](https://bintray.com/bobekos/maven/ReactiveLiveData/_latestVersio)
+```
+implementation 'com.github.bobekos:reactivelivedata:x.x.x'
+```
 
 ## Usage
 
