@@ -1,127 +1,151 @@
 package com.github.bobekos.rxviewmodelexample.viewmodel
 
-import android.arch.persistence.room.EmptyResultSetException
+import android.arch.core.executor.testing.InstantTaskExecutorRule
+import android.arch.lifecycle.Lifecycle
+import android.arch.lifecycle.LifecycleOwner
+import android.arch.lifecycle.LifecycleRegistry
+import android.database.sqlite.SQLiteAbortException
 import android.database.sqlite.SQLiteConstraintException
+import com.github.bobekos.reactivelivedata.testCompletableSubscribe
+import com.github.bobekos.reactivelivedata.testMaybeSubscribe
+import com.github.bobekos.reactivelivedata.testSingleSubscribe
 import com.github.bobekos.rxviewmodelexample.database.UserDao
 import com.github.bobekos.rxviewmodelexample.database.UserEntity
 import io.reactivex.Maybe
 import io.reactivex.Single
+import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.core.IsEqual
-import org.hamcrest.core.IsInstanceOf
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.mock
+import org.mockito.Mockito
+import org.mockito.Mockito.*
 
 
 @RunWith(JUnit4::class)
 class UserViewModelTest {
 
+    private inline fun <reified T> lambdaMock(): T = Mockito.mock(T::class.java)
+
+    @get:Rule
+    var rule: TestRule = InstantTaskExecutorRule()
+
     private val userDao = mock(UserDao::class.java)
-    private val viewModel = UserViewModel(userDao, SchedulerProvider(Schedulers.trampoline(), Schedulers.trampoline()))
+    private val viewModel = UserViewModel(userDao)
+
+    @Before
+    fun setup() {
+        RxJavaPlugins.setIoSchedulerHandler {
+            Schedulers.trampoline()
+        }
+    }
 
     @Test
     fun testInsertCompletableError() {
-        `when`(userDao.insert(UserEntity(1, "Bobekos"))).thenThrow(SQLiteConstraintException())
+        val testObject = SQLiteAbortException()
 
-        var t: Throwable? = null
-        viewModel.insert(1, "Bobekos")
-                .run(onError = {
-                    t = it
-                }, onComplete = {})
+        `when`(userDao.insert(UserEntity(1, "Bobekos"))).thenThrow(testObject)
 
-        assertThat(t, IsInstanceOf(SQLiteConstraintException::class.java))
+        val lifecycle = LifecycleRegistry(mock(LifecycleOwner::class.java))
+        lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+
+        val observer = lambdaMock<(e: Throwable) -> Unit>()
+
+        viewModel.insert(1, "Bobekos").testCompletableSubscribe(lifecycle, onError = observer)
+
+        verify(observer).invoke(testObject)
     }
 
     @Test
     fun testInsertCompletableSuccess() {
-        var success = false
+        val lifecycle = LifecycleRegistry(mock(LifecycleOwner::class.java))
+        lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
 
-        viewModel.insert(1, "Bobekos")
-                .run(onComplete = {
-                    success = true
-                })
+        val observer = lambdaMock<() -> Unit>()
 
-        assertThat(success, IsEqual(true))
+        viewModel.insert(1, "Bobekos").testCompletableSubscribe(lifecycle, onComplete = observer)
+
+        verify(observer).invoke()
     }
 
     @Test
     fun testGetFromSingleError() {
-        `when`(userDao.getByIdAsSingle(1)).thenReturn(Single.error(EmptyResultSetException("")))
+        val testObject = SQLiteConstraintException()
 
-        var t: Throwable? = null
-        viewModel.getFromSingle(1)
-                .get(onError = {
-                    t = it
-                }, onSuccess = {})
+        `when`(userDao.getByIdAsSingle(1)).then { Single.error<UserEntity>(testObject) }
 
-        assertThat(t, IsInstanceOf(EmptyResultSetException::class.java))
+        val lifecycle = LifecycleRegistry(mock(LifecycleOwner::class.java))
+        lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+
+        val observer = lambdaMock<(e: Throwable) -> Unit>()
+
+        viewModel.getFromSingle(1).testSingleSubscribe(lifecycle, onError = observer)
+
+        verify(observer).invoke(testObject)
     }
 
     @Test
     fun testGetFromSingleSuccess() {
-        `when`(userDao.getByIdAsSingle(1)).thenReturn(Single.just(UserEntity(1, "Bobekos")))
+        val testObject = UserEntity(1, "Bobekos")
 
-        var result: UserEntity? = null
-        viewModel.getFromSingle(1)
-                .get(onSuccess = {
-                    result = it
-                })
+        `when`(userDao.getByIdAsSingle(1)).then { Single.just(testObject) }
 
-        assertThat(result?.username, IsEqual("Bobekos"))
+        val lifecycle = LifecycleRegistry(mock(LifecycleOwner::class.java))
+        lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+
+        val observer = lambdaMock<(t: UserEntity) -> Unit>()
+
+        viewModel.getFromSingle(1).testSingleSubscribe(lifecycle, observer)
+
+        verify(observer).invoke(testObject)
     }
 
     @Test
     fun testGetFromMaybeError() {
-        `when`(userDao.getByIdAsMaybe(1)).thenReturn(Maybe.error(EmptyResultSetException("")))
+        val testObject = SQLiteConstraintException()
 
-        var t: Throwable? = null
-        viewModel.getFromMaybe(1)
-                .get(onError = {
-                    t = it
-                }, onComplete = {}, onSuccess = {})
+        `when`(userDao.getByIdAsMaybe(1)).then { Maybe.error<UserEntity>(testObject) }
 
-        assertThat(t, IsInstanceOf(EmptyResultSetException::class.java))
+        val lifecycle = LifecycleRegistry(mock(LifecycleOwner::class.java))
+        lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+
+        val observer = lambdaMock<(e: Throwable) -> Unit>()
+
+        viewModel.getFromMaybe(1).testMaybeSubscribe(lifecycle, onError = observer)
+
+        verify(observer).invoke(testObject)
     }
 
     @Test
     fun testGetFromMaybeEmpty() {
-        `when`(userDao.getByIdAsMaybe(1)).thenReturn(Maybe.empty())
+        `when`(userDao.getByIdAsMaybe(1)).then { Maybe.empty<UserEntity>() }
 
-        var result = false
-        viewModel.getFromMaybe(1)
-                .get(onComplete = {
-                    result = true
-                }, onError = {}, onSuccess = {})
+        val lifecycle = LifecycleRegistry(mock(LifecycleOwner::class.java))
+        lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
 
-        assertThat(result, IsEqual(true))
+        val observer = lambdaMock<() -> Unit>()
+
+        viewModel.getFromMaybe(1).testMaybeSubscribe(lifecycle, onComplete = observer)
+
+        verify(observer).invoke()
     }
 
     @Test
     fun testGetFromMaybeSuccess() {
-        `when`(userDao.getByIdAsMaybe(1)).thenReturn(Maybe.just(UserEntity(1, "Bobekos")))
+        val testObject = UserEntity(1, "Bobekos")
 
-        var result: UserEntity? = null
-        viewModel.getFromMaybe(1)
-                .get(onSuccess = {
-                    result = it
-                })
+        `when`(userDao.getByIdAsMaybe(1)).then { Maybe.just(testObject) }
 
-        assertThat(result?.username, IsEqual("Bobekos"))
-    }
+        val lifecycle = LifecycleRegistry(mock(LifecycleOwner::class.java))
+        lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
 
-    @Test
-    fun testDeleteUser() {
-        var success = false
+        val observer = lambdaMock<(t: UserEntity) -> Unit>()
 
-        viewModel.insert(1, "Bobekos")
-                .run(onComplete = {
-                    success = true
-                })
+        viewModel.getFromMaybe(1).testMaybeSubscribe(lifecycle, onSuccess = observer)
 
-        assertThat(success, IsEqual(true))
+        verify(observer).invoke(testObject)
     }
 }
