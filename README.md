@@ -1,6 +1,6 @@
-# RxViewModel
+# ReactiveLiveData
 
-An RxJava Extension to the ViewModel introduced by Google. Provides the ability to perform single actions using RxJava and takes advantage of an automatic subscription of the ViewModel. Mainly designed to used Room CRUD commands with RxJava.
+An RxJava Extension for the LiveData observer introduced by Google. Provides the ability to perform single actions using RxJava and takes advantage of an automatic subscription of the Lifecycle owner. Mainly designed to used Room CRUD commands with RxJava.
 
 ## Getting Started
 
@@ -10,45 +10,110 @@ An RxJava Extension to the ViewModel introduced by Google. Provides the ability 
 
 ## Usage
 
-Just extend your existing ViewModel with the RxViewModel class:
+Just use one of the available reactiveSource classes:
+
+#### CompletableReactiveSource
 
 ```kotlin
-class UserViewModel(private val dao: UserDao) : RxViewModel() {
+//ViewModel
+class UserViewModel(private val dao: UserDao) : ViewModel() {
 
-    fun insert(id: Int, name: String): CompletableAction {
-        return CompletableAction { dao.insert(UserEntity(id, name)) }
+    fun insert(id: Int, name: String): LiveData<Optional<Nothing>> {
+        return CompletableReactiveSource.fromAction {
+            dao.insert(UserEntity(id, name))
+        }
     }
-
-    fun getFromMaybe(id: Int): ActionFromMaybe<UserEntity> {
-        return ActionFromMaybe(dao.getByIdAsMaybe(id))
-    }
-
-    fun loadUsers() : LiveData<UserEntity> {
-        return liveDataFromFlowable(dao.getUsers())
-    }
-
-    fun delete(id: Int, name: String): CompletableAction {
-        return CompletableAction { dao.delete(UserEntity(id, name)) }
-    }
-
 }
+
+//Activity/Fragment/etc.
+...
+//short
+viewModel.insert(1, "User").subscribeCompletable(this)
+//or with callback
+viewModel.insert(1, "Bobekos").subscribeCompletable(this,
+                    onComplete = {
+                        showToast("User inserted")
+                    },
+                    onError = {
+                        showToast(it.message)
+                    })
+```
+
+#### SingleReactiveSource
+
+```kotlin
+//ViewModel
+class UserViewModel(private val dao: UserDao) : ViewModel() {
+
+    fun getFromSingle(id: Int): LiveData<Optional<UserEntity>> {
+        return SingleReactiveSource.from(dao.getByIdAsSingle(id))
+    }
+}
+
+//Activity/Fragment/etc.
+...
+viewModel.getFromSingle(1).subscribeSingle(this,
+                    onSuccess = {
+                        showToast("User ${it.username} loaded")
+                    },
+                    onError = {
+                        showToast(it.message)
+                    })
+```
+
+#### MaybeReactiveSource
+
+```kotlin
+//ViewModel
+class UserViewModel(private val dao: UserDao) : ViewModel() {
+
+    fun getFromMaybe(id: Int): LiveData<Optional<UserEntity>> {
+        return MaybeReactiveSource.from(dao.getByIdAsMaybe(id))
+    }
+}
+
+//Activity/Fragment/etc.
+...
+viewModel.getFromMaybe(1).subscribeMaybe(this,
+                    onSuccess = {
+                        showToast("User ${it.username} loaded")
+                    },
+                    onError = {
+                        showToast(it.message)
+                    },
+                    onComplete = {
+                        showToast("No user found")
+                    })
+```
+
+#### NullSafe extension for LiveDataReactiveStreams
+
+```kotlin
+//ViewModel
+class UserViewModel(private val dao: UserDao) : ViewModel() {
+
+    fun loadUser(): LiveData<UserEntity> {
+        return LiveDataReactiveStreams.fromPublisher(dao.getUsers())
+    }
+}
+
+//Activity/Fragment/etc.
+...
+//short
+viewModel.loadUser().nonNullObserver(this, observer = {
+            showToast("I'm not null ${it.username}")
+        })
+//or with null callback
+viewModel.loadUser().nonNullObserver(this,
+                observer = {
+                    showToast("I'm observing ${it.username}")
+                },
+                nullObserver = {
+                    showToast("Value is null")
+                })
 ```
 
 ## Features
-
-### CompletableAction
-
-...
-
-### ActionFromSingle
-
-...
-
-### ActionFromMaybe
-
-...
-
-### LiveDataFromFlowable
 
 ...
 
