@@ -1,13 +1,14 @@
 package com.github.bobekos.reactivelivedata
 
+import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.Observer
 import android.support.annotation.NonNull
 import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.SingleObserver
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 
@@ -20,22 +21,27 @@ class SingleReactiveSource<T>(@NonNull private val source: Single<T>) : LiveData
     }
 
     private val subscriber = AtomicReference<SingleDataSubscriber>()
-    private val pendingEvent = AtomicBoolean(false)
+    private val observerReference = AtomicReference<Observer<Optional<T>>>()
 
     override fun onActive() {
         super.onActive()
 
-        if (pendingEvent.compareAndSet(false, true)) {
-            val s = SingleDataSubscriber()
-            subscriber.set(s)
-            source.subscribe(s)
-        }
+        val s = SingleDataSubscriber()
+        subscriber.set(s)
+        source.subscribe(s)
+    }
+
+    override fun observe(owner: LifecycleOwner, observer: Observer<Optional<T>>) {
+        super.observe(owner, observer)
+
+        observerReference.compareAndSet(null, observer)
     }
 
     override fun onInactive() {
         super.onInactive()
 
         subscriber.getAndSet(null)?.dispose()
+        removeObserver(observerReference.getAndSet(null))
     }
 
 
