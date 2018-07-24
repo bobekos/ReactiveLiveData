@@ -1,17 +1,18 @@
 package com.github.bobekos.reactivelivedata
 
+import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.Observer
 import android.support.annotation.NonNull
 import io.reactivex.Completable
 import io.reactivex.CompletableObserver
 import io.reactivex.Scheduler
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 
-class CompletableReactiveSource constructor(@NonNull private val source: Completable) : LiveData<Optional<Nothing>>() {
+class CompletableReactiveSource(@NonNull private val source: Completable) : LiveData<Optional<Nothing>>() {
 
     companion object {
         fun from(@NonNull source: Completable, subscribeScheduler: Scheduler = Schedulers.io()): LiveData<Optional<Nothing>> {
@@ -24,22 +25,27 @@ class CompletableReactiveSource constructor(@NonNull private val source: Complet
     }
 
     private val subscriber = AtomicReference<CompletableDataSubscriber>()
-    private val pendingEvent = AtomicBoolean(false)
+    private val observerReference = AtomicReference<Observer<Optional<Nothing>>>()
 
     override fun onActive() {
         super.onActive()
 
-        if (pendingEvent.compareAndSet(false, true)) {
-            val s = CompletableDataSubscriber()
-            subscriber.set(s)
-            source.subscribe(s)
-        }
+        val s = CompletableDataSubscriber()
+        subscriber.set(s)
+        source.subscribe(s)
+    }
+
+    override fun observe(owner: LifecycleOwner, observer: Observer<Optional<Nothing>>) {
+        super.observe(owner, observer)
+
+        observerReference.compareAndSet(null, observer)
     }
 
     override fun onInactive() {
         super.onInactive()
 
         subscriber.getAndSet(null)?.dispose()
+        removeObserver(observerReference.getAndSet(null))
     }
 
     inner class CompletableDataSubscriber : AtomicReference<Disposable>(), CompletableObserver {
