@@ -23,7 +23,7 @@ inline fun <T> LiveData<Optional<T>>.subscribeMaybe(owner: LifecycleOwner, cross
             when (it) {
                 is Optional.Complete -> onComplete()
                 is Optional.Result<T> -> onSuccess(it.result)
-                is Optional.Exception<T> -> onError(it.throwable)
+                is Optional.Exception -> onError(it.throwable)
             }
         }
     })
@@ -70,7 +70,7 @@ inline fun <T> LiveData<Optional<T>>.testMaybeSubscribe(owner: Lifecycle, crossi
             when (it) {
                 is Optional.Complete -> onComplete()
                 is Optional.Result<T> -> onSuccess(it.result)
-                is Optional.Exception<T> -> onError(it.throwable)
+                is Optional.Exception -> onError(it.throwable)
             }
         }
     })
