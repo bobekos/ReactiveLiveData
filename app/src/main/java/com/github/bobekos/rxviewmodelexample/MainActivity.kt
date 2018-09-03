@@ -3,10 +3,7 @@ package com.github.bobekos.rxviewmodelexample
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
-import com.github.bobekos.reactivelivedata.subscribeCompletable
-import com.github.bobekos.reactivelivedata.subscribeMaybe
-import com.github.bobekos.reactivelivedata.nonNullObserver
-import com.github.bobekos.reactivelivedata.subscribeSingle
+import com.github.bobekos.reactivelivedata.*
 import com.github.bobekos.rxviewmodelexample.viewmodel.UserViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.ext.android.inject
@@ -19,7 +16,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        viewModel.loadUser().nonNullObserver(this, observer = {
+        viewModel.loadUser().subscribeFlowable(this, onNext = {
             showToast("I'm observing ${it.username}")
         })
 
