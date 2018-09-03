@@ -71,7 +71,7 @@ dependencies {
     api "android.arch.lifecycle:reactivestreams:$livedata"
     testImplementation "android.arch.core:core-testing:$livedata"
 
-    testImplementation 'org.mockito:mockito-core:2.11.0'
+    testImplementation 'org.mockito:mockito-core:2.19.0'
 }
 
 apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'

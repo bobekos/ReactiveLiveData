@@ -1,12 +1,8 @@
 package com.github.bobekos.rxviewmodelexample.viewmodel
 
 import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.LiveDataReactiveStreams
 import android.arch.lifecycle.ViewModel
-import com.github.bobekos.reactivelivedata.CompletableReactiveSource
-import com.github.bobekos.reactivelivedata.MaybeReactiveSource
-import com.github.bobekos.reactivelivedata.Optional
-import com.github.bobekos.reactivelivedata.SingleReactiveSource
+import com.github.bobekos.reactivelivedata.*
 import com.github.bobekos.rxviewmodelexample.database.UserDao
 import com.github.bobekos.rxviewmodelexample.database.UserEntity
 import io.reactivex.Completable
@@ -40,7 +36,7 @@ class UserViewModel(private val dao: UserDao) : ViewModel() {
         })
     }
 
-    fun loadUser(): LiveData<UserEntity> {
-        return LiveDataReactiveStreams.fromPublisher(dao.getUsers())
+    fun loadUser(): LiveData<Optional<UserEntity>> {
+        return FlowableReactiveSource.from(dao.getUsers())
     }
 }

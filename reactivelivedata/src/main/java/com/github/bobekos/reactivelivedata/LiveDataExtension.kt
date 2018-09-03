@@ -29,6 +29,18 @@ inline fun <T> LiveData<Optional<T>>.subscribeMaybe(owner: LifecycleOwner, cross
     })
 }
 
+inline fun <T> LiveData<Optional<T>>.subscribeFlowable(owner: LifecycleOwner, crossinline onNext: (t: T) -> Unit, crossinline onError: (e: Throwable) -> Unit = {}, crossinline onComplete: () -> Unit = {}) {
+    this.observe(owner, Observer {
+        if (it != null) {
+            when (it) {
+                is Optional.Complete -> onComplete()
+                is Optional.Result<T> -> onNext(it.result)
+                is Optional.Exception -> onError(it.throwable)
+            }
+        }
+    })
+}
+
 inline fun LiveData<Optional<Nothing>>.subscribeCompletable(owner: LifecycleOwner, crossinline onComplete: () -> Unit = {}, crossinline onError: (e: Throwable) -> Unit = {}) {
     this.observe(owner, Observer {
         if (it != null) {
@@ -70,6 +82,19 @@ inline fun <T> LiveData<Optional<T>>.testMaybeSubscribe(owner: Lifecycle, crossi
             when (it) {
                 is Optional.Complete -> onComplete()
                 is Optional.Result<T> -> onSuccess(it.result)
+                is Optional.Exception -> onError(it.throwable)
+            }
+        }
+    })
+}
+
+@TestOnly
+inline fun <T> LiveData<Optional<T>>.testFlowableSubscribe(owner: Lifecycle, crossinline onNext: (t: T) -> Unit = {}, crossinline onError: (e: Throwable) -> Unit = {}, crossinline onComplete: () -> Unit = {}) {
+    this.observe({ owner }, {
+        if (it != null) {
+            when (it) {
+                is Optional.Complete -> onComplete()
+                is Optional.Result<T> -> onNext(it.result)
                 is Optional.Exception -> onError(it.throwable)
             }
         }
