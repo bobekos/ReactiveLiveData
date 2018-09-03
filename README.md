@@ -98,6 +98,33 @@ viewModel.getFromMaybe(1).subscribeMaybe(this,
                     })
 ```
 
+#### FlowableReactiveSource
+
+```kotlin
+//ViewModel
+class UserViewModel(private val dao: UserDao) : ViewModel() {
+
+    fun getFromFlowable(): LiveData<Optional<UserEntity>> {
+        return FlowableReactiveSource.from(dao.getUsers())
+    }
+}
+
+//Activity/Fragment/etc.
+...
+viewModel.getFromFlowable().subscribeFlowable(this,
+                    onNext = {
+                        showToast("${it.size} User loaded")
+                    },
+                    //optional
+                    onError = {
+                        showToast(it.message)
+                    },
+                    //optional
+                    onComplete = {
+                        showToast("No user found")
+                    })
+```
+
 #### NullSafe extension for LiveDataReactiveStreams
 
 ```kotlin
