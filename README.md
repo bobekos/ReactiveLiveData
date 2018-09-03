@@ -125,7 +125,7 @@ viewModel.getFromFlowable().subscribeFlowable(this,
                     })
 ```
 
-#### NullSafe extension for LiveDataReactiveStreams
+#### NullSafe extension for LiveDataReactiveStreams without exception support
 
 ```kotlin
 //ViewModel
@@ -160,6 +160,7 @@ For each reactive source there is a specific test method.
 liveData.testCompletableSubscribe(...)
 liveData.testMaybeSubscribe(...)
 liveData.testSingleSubscribe(...)
+liveData.testFlowableSubscribe(...)
 ```
 
 Make sure to include the 'InstantTastExecutorRule' (core-testing) into your tests. Furthermore, the default IoSchedulerHandler (or the scheduler which you used) should be overwritten.
