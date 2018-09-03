@@ -5,10 +5,12 @@ import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.LifecycleRegistry
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
+import org.intellij.lang.annotations.Flow
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -144,5 +146,51 @@ class ReactiveLiveDataTest {
         CompletableReactiveSource.from(source).testCompletableSubscribe(lifecycle, onError = observer)
 
         verify(observer).invoke(testObject)
+    }
+
+    @Test
+    fun testFlowableSourceOnSuccess() {
+        val testObject = "TestString"
+
+        val lifecycle = LifecycleRegistry(mock(LifecycleOwner::class.java))
+        lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+
+        val source = Flowable.just(testObject)
+
+        val observer = lambdaMock<(t: String) -> Unit>()
+
+        FlowableReactiveSource.from(source).testFlowableSubscribe(lifecycle, observer)
+
+        verify(observer).invoke("TestString")
+    }
+
+    @Test
+    fun testFlowableSourceOnError() {
+        val testObject = IllegalStateException()
+
+        val lifecycle = LifecycleRegistry(mock(LifecycleOwner::class.java))
+        lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+
+        val source = Flowable.error<String>(testObject)
+
+        val observer = lambdaMock<(e: Throwable) -> Unit>()
+
+        FlowableReactiveSource.from(source).testFlowableSubscribe(lifecycle, onError = observer)
+
+        verify(observer).invoke(testObject)
+    }
+
+    @Test
+    fun testFlowableSourceOnComplete() {
+        val lifecycle = LifecycleRegistry(mock(LifecycleOwner::class.java))
+        lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+
+        val source = Flowable.empty<String>()
+
+        val observer = lambdaMock<() -> Unit>()
+
+        FlowableReactiveSource.from(source).testFlowableSubscribe(lifecycle, onComplete = observer)
+
+        verify(observer).invoke()
     }
 }
