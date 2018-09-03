@@ -7,10 +7,12 @@ import android.arch.lifecycle.LifecycleRegistry
 import android.database.sqlite.SQLiteAbortException
 import android.database.sqlite.SQLiteConstraintException
 import com.github.bobekos.reactivelivedata.testCompletableSubscribe
+import com.github.bobekos.reactivelivedata.testFlowableSubscribe
 import com.github.bobekos.reactivelivedata.testMaybeSubscribe
 import com.github.bobekos.reactivelivedata.testSingleSubscribe
 import com.github.bobekos.rxviewmodelexample.database.UserDao
 import com.github.bobekos.rxviewmodelexample.database.UserEntity
+import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.plugins.RxJavaPlugins
@@ -145,6 +147,38 @@ class UserViewModelTest {
         val observer = lambdaMock<(t: UserEntity) -> Unit>()
 
         viewModel.getFromMaybe(1).testMaybeSubscribe(lifecycle, onSuccess = observer)
+
+        verify(observer).invoke(testObject)
+    }
+
+    @Test
+    fun testLoadUserSuccess() {
+        val testObject = UserEntity(1, "Bobekos")
+
+        `when`(userDao.getUsers()).then { Flowable.just(testObject) }
+
+        val lifecycle = LifecycleRegistry(mock(LifecycleOwner::class.java))
+        lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+
+        val observer = lambdaMock<(t: UserEntity) -> Unit>()
+
+        viewModel.loadUser().testFlowableSubscribe(lifecycle, onNext = observer)
+
+        verify(observer).invoke(testObject)
+    }
+
+    @Test
+    fun testLoadUserError() {
+        val testObject = SQLiteConstraintException()
+
+        `when`(userDao.getUsers()).then { Flowable.error<UserEntity>(testObject) }
+
+        val lifecycle = LifecycleRegistry(mock(LifecycleOwner::class.java))
+        lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+
+        val observer = lambdaMock<(e: Throwable) -> Unit>()
+
+        viewModel.loadUser().testFlowableSubscribe(lifecycle, onError = observer)
 
         verify(observer).invoke(testObject)
     }
