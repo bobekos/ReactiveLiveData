@@ -113,7 +113,7 @@ class UserViewModel(private val dao: UserDao) : ViewModel() {
 ...
 viewModel.getFromFlowable().subscribeFlowable(this,
                     onNext = {
-                        showToast("${it.size} User loaded")
+                        showToast("User ${it.name} loaded")
                     },
                     //optional
                     onError = {
@@ -125,7 +125,9 @@ viewModel.getFromFlowable().subscribeFlowable(this,
                     })
 ```
 
-#### NullSafe extension for LiveDataReactiveStreams without exception support
+#### NullSafe extension for LiveDataReactiveStreams
+
+But without exception support. Use FlowableReactiveStream instead.
 
 ```kotlin
 //ViewModel
